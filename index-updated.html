@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What's the Cost of Your Air + Sewer + Water Bill?</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0e27;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Realistic rain effect */
+        .rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .drop {
+            position: absolute;
+            bottom: 100%;
+            width: 2px;
+            height: 50px;
+            background: linear-gradient(to bottom, rgba(100, 200, 255, 0) 0%, rgba(100, 200, 255, 0.8) 100%);
+            animation: fall linear infinite;
+        }
+        
+        @keyframes fall {
+            to {
+                transform: translateY(100vh);
+            }
+        }
+        
+        /* Tech grid background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(6, 182, 212, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(6, 182, 212, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: 0;
+        }
+        
+        /* Glowing orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+            animation: float 20s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .orb1 {
+            width: 400px;
+            height: 400px;
+            background: #06b6d4;
+            top: -200px;
+            left: -200px;
+        }
+        
+        .orb2 {
+            width: 500px;
+            height: 500px;
+            background: #3b82f6;
+            bottom: -250px;
+            right: -250px;
+            animation-delay: -10s;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(50px, -50px) scale(1.1); }
+            66% { transform: translate(-50px, 50px) scale(0.9); }
+        }
+        
+        .container {
+            background: rgba(15, 23, 42, 0.95);
+            border-radius: 24px;
+            box-shadow: 
+                0 0 60px rgba(6, 182, 212, 0.2),
+                0 30px 90px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            max-width: 600px;
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+            z-index: 10;
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            backdrop-filter: blur(20px);
+            animation: slideUp 0.6s ease;
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #0c4a6e 0%, #0e7490 50%, #06b6d4 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 200%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shine 3s infinite;
+        }
+        
+        @keyframes shine {
+            to { left: 100%; }
+        }
+        
+        .water-icon {
+            font-size: 70px;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px rgba(6, 182, 212, 0.8));
+        }
+        
+        .header h1 {
+            font-size: 36px;
+            font-weight: 800;
+            line-height: 1.2;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 0 30px rgba(0,0,0,0.5);
+        }
+        
+        /* Progress Bar */
+        #progressContainer {
+            display: none;
+            background: rgba(15, 23, 42, 0.8);
+            border-bottom: 1px solid rgba(6, 182, 212, 0.2);
+        }
+        
+        #progressBar {
+            height: 4px;
+            background: linear-gradient(90deg, #06b6d4 0%, #3b82f6 100%);
+            width: 0%;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.6);
+        }
+        
+        .progress-info {
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #94a3b8;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        #progressText {
+            color: #06b6d4;
+        }
+        
+        #progressPercent {
+            color: #3b82f6;
+            font-size: 14px;
+        }
+        
+        .content {
+            padding: 50px 40px;
+        }
+        
+        .question-section {
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .question {
+            font-size: 28px;
+            font-weight: 700;
+            color: #f1f5f9;
+            margin-bottom: 40px;
+            line-height: 1.4;
+        }
+        
+        .answer-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .answer-btn {
+            padding: 20px 45px;
+            font-size: 18px;
+            font-weight: 700;
+            border: 2px solid rgba(6, 182, 212, 0.5);
+            background: rgba(6, 182, 212, 0.1);
+            color: #06b6d4;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-width: 140px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+        
+        .answer-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(6, 182, 212, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .answer-btn:hover::before {
+            width: 400px;
+            height: 400px;
+        }
+        
+        .answer-btn:hover {
+            background: linear-gradient(135deg, #06b6d4 0%, #0e7490 100%);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 40px rgba(6, 182, 212, 0.4);
+            border-color: #06b6d4;
+        }
+        
+        .answer-btn span {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .reveal-section {
+            display: none;
+            animation: fadeIn 0.6s ease;
+        }
+        
+        .reveal-box {
+            background: linear-gradient(135deg, rgba(220, 38, 38, 0.2) 0%, rgba(239, 68, 68, 0.1) 100%);
+            border-left: 4px solid #ef4444;
+            padding: 35px;
+            border-radius: 16px;
+            margin-bottom: 35px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        
+        .reveal-box h2 {
+            color: #fca5a5;
+            font-size: 28px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .reveal-box p {
+            color: #fecaca;
+            font-size: 17px;
+            line-height: 1.8;
+        }
+        
+        .form-section {
+            display: none;
+        }
+        
+        .question-step {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .form-intro {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+        
+        .form-intro h3 {
+            font-size: 26px;
+            color: #f1f5f9;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+        
+        .form-intro p {
+            color: #94a3b8;
+            font-size: 15px;
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+        }
+        
+        .input-group label {
+            display: block;
+            color: #cbd5e1;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .text-input {
+            width: 100%;
+            padding: 18px 24px;
+            border: 2px solid rgba(6, 182, 212, 0.3);
+            border-radius: 12px;
+            font-size: 17px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            background: rgba(15, 23, 42, 0.6);
+            color: #f1f5f9;
+            backdrop-filter: blur(10px);
+        }
+        
+        .text-input::placeholder {
+            color: #64748b;
+        }
+        
+        .text-input:focus {
+            outline: none;
+            border-color: #06b6d4;
+            box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.1), 0 0 20px rgba(6, 182, 212, 0.3);
+            transform: translateY(-2px);
+            background: rgba(15, 23, 42, 0.8);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .back-btn {
+            padding: 18px 35px;
+            background: rgba(71, 85, 105, 0.3);
+            color: #cbd5e1;
+            border: 2px solid rgba(71, 85, 105, 0.5);
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .back-btn:hover {
+            background: rgba(71, 85, 105, 0.5);
+            border-color: #64748b;
+            transform: translateY(-2px);
+        }
+        
+        .submit-btn {
+            flex: 1;
+            padding: 18px;
+            background: linear-gradient(135deg, #06b6d4 0%, #0e7490 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(6, 182, 212, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(6, 182, 212, 0.5);
+        }
+        
+        .education-section {
+            display: none;
+        }
+        
+        .success-box {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.1) 100%);
+            color: white;
+            padding: 50px 40px;
+            border-radius: 20px;
+            margin-bottom: 40px;
+            text-align: center;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            backdrop-filter: blur(10px);
+            animation: scaleIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .success-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: bounce 1s ease infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        
+        .savings-display {
+            background: rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 35px;
+            margin-top: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .savings-amount {
+            font-size: 56px;
+            font-weight: 800;
+            margin: 15px 0;
+            background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .info-box {
+            background: rgba(6, 182, 212, 0.1);
+            border-left: 4px solid #06b6d4;
+            padding: 30px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+        }
+        
+        .info-box h3 {
+            color: #06b6d4;
+            font-size: 22px;
+            margin-bottom: 16px;
+        }
+        
+        .info-box ul {
+            color: #cbd5e1;
+            margin-left: 25px;
+            line-height: 2;
+        }
+        
+        .stat-card {
+            background: rgba(15, 23, 42, 0.8);
+            border: 2px solid rgba(6, 182, 212, 0.3);
+            padding: 30px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(6, 182, 212, 0.3);
+            border-color: #06b6d4;
+        }
+        
+        .stat-card h3 {
+            color: #06b6d4;
+            font-size: 20px;
+            margin-bottom: 16px;
+        }
+        
+        .case-study {
+            background: rgba(15, 23, 42, 0.8);
+            border: 2px solid rgba(6, 182, 212, 0.3);
+            padding: 35px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+        
+        .case-study::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #06b6d4 0%, #10b981 100%);
+        }
+        
+        .case-study:hover {
+            transform: translateX(5px);
+            box-shadow: 0 10px 40px rgba(6, 182, 212, 0.3);
+            border-color: #06b6d4;
+        }
+        
+        .case-study-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        .case-study h3 {
+            color: #06b6d4;
+            font-size: 24px;
+            margin-bottom: 16px;
+        }
+        
+        .case-study p {
+            color: #cbd5e1;
+            line-height: 1.7;
+            margin-bottom: 12px;
+        }
+        
+        .case-study-result {
+            color: #10b981;
+            font-size: 22px;
+            font-weight: 800;
+            margin-top: 16px;
+        }
+        
+        .video-container {
+            margin: 40px 0;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            border: 2px solid rgba(6, 182, 212, 0.3);
+        }
+        
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .cta-link {
+            display: inline-block;
+            background: linear-gradient(135deg, #06b6d4 0%, #0e7490 100%);
+            color: white;
+            padding: 16px 40px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(6, 182, 212, 0.4);
+        }
+        
+        .cta-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(6, 182, 212, 0.6);
+        }
+        
+        @media (max-width: 640px) {
+            .header h1 {
+                font-size: 28px;
+            }
+            
+            .question {
+                font-size: 22px;
+            }
+            
+            .answer-buttons {
+                flex-direction: column;
+            }
+            
+            .answer-btn {
+                width: 100%;
+            }
+            
+            .content {
+                padding: 30px 25px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .back-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Tech orbs -->
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    
+    <!-- Realistic rain effect -->
+    <div class="rain" id="rain"></div>
+    
+    <div class="container">
+        <div class="header">
+            <div class="water-icon">💧</div>
+            <h1>What's the Cost of Your<br>Air + Sewer + Water Bill?</h1>
+        </div>
+        
+        <!-- Progress Bar -->
+        <div id="progressContainer">
+            <div id="progressBar"></div>
+            <div class="progress-info">
+                <span id="progressText">Step 1 of 5</span>
+                <span id="progressPercent">20%</span>
+            </div>
+        </div>
+        
+        <div class="content">
+            <!-- Question Section -->
+            <div class="question-section" id="questionSection">
+                <div class="question">
+                    Do you pay for air in your water bill?
+                </div>
+                <div class="answer-buttons">
+                    <button class="answer-btn" onclick="handleAnswer(true)"><span>I Think So</span></button>
+                    <button class="answer-btn" onclick="handleAnswer(false)"><span>No Way</span></button>
+                    <button class="answer-btn" onclick="handleAnswer(false)"><span>Not Sure</span></button>
+                </div>
+            </div>
+            
+            <!-- Reveal Section -->
+            <div class="reveal-section" id="revealSection">
+                <div class="reveal-box">
+                    <h2>🚨 Actually, You ARE Paying for Air!</h2>
+                    <p>
+                        Most property owners don't realize this, but <strong>entrained air in your water pipes is causing your meter to over-register by up to 30%</strong>. 
+                        You're literally being billed for air as if it were water.
+                    </p>
+                </div>
+                
+                <p style="color: #94a3b8; margin-bottom: 30px; line-height: 1.8; font-size: 16px; text-align: center;">
+                    💧 NSF International—the gold standard for water system testing—documented this hidden crisis. 
+                    Their independent lab testing revealed shocking meter accuracy problems that are costing you thousands.
+                </p>
+                
+                <div style="text-align: center; margin-top: 40px;">
+                    <button class="submit-btn" onclick="showForm()" style="max-width: 500px; margin: 0 auto;">
+                        💰 See How Much You're Overpaying →
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Form Section -->
+            <div class="form-section" id="formSection">
+                <!-- Step 1: Name -->
+                <div class="question-step" id="step1" style="display: block;">
+                    <div class="form-intro">
+                        <h3>👋 Let's get started</h3>
+                        <p>What's your name?</p>
+                    </div>
+                    <div class="input-group">
+                        <label>First Name</label>
+                        <input type="text" id="firstName" class="text-input" placeholder="John">
+                    </div>
+                    <div class="input-group">
+                        <label>Last Name</label>
+                        <input type="text" id="lastName" class="text-input" placeholder="Doe">
+                    </div>
+                    <div class="button-group">
+                        <button class="submit-btn" onclick="nextStep(2)">Continue →</button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Company Info -->
+                <div class="question-step" id="step2" style="display: none;">
+                    <div class="form-intro">
+                        <h3>🏢 Tell us about your company</h3>
+                    </div>
+                    <div class="input-group">
+                        <label>Company Name</label>
+                        <input type="text" id="company" class="text-input" placeholder="Acme Corporation">
+                    </div>
+                    <div class="input-group">
+                        <label>Your Job Title</label>
+                        <input type="text" id="jobTitle" class="text-input" placeholder="Facilities Manager">
+                    </div>
+                    <div class="button-group">
+                        <button class="back-btn" onclick="prevStep(1)">← Back</button>
+                        <button class="submit-btn" onclick="nextStep(3)">Continue →</button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Property Type -->
+                <div class="question-step" id="step3" style="display: none;">
+                    <div class="form-intro">
+                        <h3>🏭 What type of property?</h3>
+                    </div>
+                    <div class="answer-buttons" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+                        <button class="answer-btn" onclick="selectPropertyType('data-center')" style="padding: 18px;"><span>🖥️ Data Center</span></button>
+                        <button class="answer-btn" onclick="selectPropertyType('hotel')" style="padding: 18px;"><span>🏨 Hotel</span></button>
+                        <button class="answer-btn" onclick="selectPropertyType('multifamily')" style="padding: 18px;"><span>🏘️ Multifamily</span></button>
+                        <button class="answer-btn" onclick="selectPropertyType('hospital')" style="padding: 18px;"><span>🏥 Hospital</span></button>
+                        <button class="answer-btn" onclick="selectPropertyType('commercial')" style="padding: 18px;"><span>🏢 Commercial</span></button>
+                        <button class="answer-btn" onclick="selectPropertyType('industrial')" style="padding: 18px;"><span>🏭 Industrial</span></button>
+                        <button class="answer-btn" onclick="selectPropertyType('other')" style="padding: 18px;"><span>📋 Other</span></button>
+                    </div>
+                    <div class="button-group" style="margin-top: 30px;">
+                        <button class="back-btn" onclick="prevStep(2)">← Back</button>
+                    </div>
+                </div>
+
+                <!-- Step 4: Water Bill & Referral -->
+                <div class="question-step" id="step4" style="display: none;">
+                    <div class="form-intro">
+                        <h3>💰 Monthly water bill & how you found us</h3>
+                    </div>
+                    <div class="input-group">
+                        <label>Approximate Monthly Water Bill</label>
+                        <div style="display: grid; gap: 12px;">
+                            <button class="answer-btn" onclick="selectWaterBill('under-1500', 1000)" style="width: 100%;"><span>Under $1,500</span></button>
+                            <button class="answer-btn" onclick="selectWaterBill('1500-5000', 3250)" style="width: 100%;"><span>$1,500 - $5,000</span></button>
+                            <button class="answer-btn" onclick="selectWaterBill('5000-15000', 10000)" style="width: 100%;"><span>$5,000 - $15,000</span></button>
+                            <button class="answer-btn" onclick="selectWaterBill('15000-plus', 20000)" style="width: 100%;"><span>$15,000+</span></button>
+                        </div>
+                    </div>
+                    <div class="button-group" style="margin-top: 20px;">
+                        <button class="back-btn" onclick="prevStep(3)">← Back</button>
+                    </div>
+                </div>
+
+                <!-- Step 5: Estimate + Detailed Email -->
+                <div class="question-step" id="step5" style="display: none;">
+                    <div class="form-intro">
+                        <h3>📊 Your estimate (headline)</h3>
+                        <p style="opacity: 0.9;">We’ll show your headline range now, then email you the detailed assumptions + verification plan.</p>
+                    </div>
+
+                    <div class="savings-display" style="margin-bottom: 18px;">
+                        <p style="font-size: 18px; margin-bottom: 10px; opacity: 0.9; color: #cbd5e1;">💰 Estimated Annual Savings:</p>
+                        <div class="savings-amount" id="headlineSavingsAmount">$0</div>
+                        <p style="font-size: 15px; opacity: 0.85; margin-top: 10px; color: #94a3b8;">
+                            Based on a modeled 10–30% reduction from your monthly water bill of <span id="headlineBill">$0</span>
+                        </p>
+                        <p style="font-size: 15px; opacity: 0.85; margin-top: 6px; color: #94a3b8;">
+                            Estimated Monthly Savings: <span id="headlineMonthlySavings">$0 - $0</span>
+                        </p>
+                    </div>
+
+                    <div class="case-study-card" id="proofCard" style="margin-bottom: 18px;">
+                        <h4 style="margin-bottom: 8px;">Proof in similar facilities</h4>
+                        <div id="proofCardBody" style="opacity: 0.95; line-height: 1.5;"></div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Email Address (to send your detailed estimate)</label>
+                        <input type="email" id="email" class="text-input" placeholder="john@company.com" autocomplete="email">
+                        <p style="font-size: 13px; opacity: 0.8; margin-top: 8px; color: #94a3b8;">No spam. We’ll only send your estimate + next steps.</p>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Phone Number (Optional)</label>
+                        <input type="tel" id="phone" class="text-input" placeholder="(555) 123-4567" autocomplete="tel">
+                    </div>
+
+                    <!-- Honeypot (spam trap): if filled, we ignore submission -->
+                    <div style="position:absolute; left:-10000px; top:auto; width:1px; height:1px; overflow:hidden;">
+                        <label>Website</label>
+                        <input type="text" id="website" tabindex="-1" autocomplete="off">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Where did you hear about us?</label>
+                        <div style="display: grid; gap: 12px;">
+                            <button class="answer-btn" onclick="selectReferralAndSubmit('linkedin')" style="width: 100%;"><span>💼 LinkedIn</span></button>
+                            <button class="answer-btn" onclick="selectReferralAndSubmit('google')" style="width: 100%;"><span>🔍 Google</span></button>
+                            <button class="answer-btn" onclick="selectReferralAndSubmit('referral')" style="width: 100%;"><span>🤝 Referral</span></button>
+                            <button class="answer-btn" onclick="selectReferralAndSubmit('event')" style="width: 100%;"><span>🎟️ Event / Trade Show</span></button>
+                            <button class="answer-btn" onclick="selectReferralAndSubmit('other')" style="width: 100%;"><span>📋 Other</span></button>
+                        </div>
+                    </div>
+
+                    <details style="margin-top: 14px;">
+                        <summary style="cursor: pointer; opacity: 0.95;">Preview the email we’ll send</summary>
+                        <pre id="emailPreview" style="white-space: pre-wrap; margin-top: 12px; background: rgba(255,255,255,0.06); padding: 14px; border-radius: 12px; font-size: 13px; line-height: 1.45; color: #e2e8f0;"></pre>
+                    </details>
+
+                    <div class="button-group" style="margin-top: 20px;">
+                        <button class="back-btn" onclick="prevStep(4)">← Back</button>
+                    </div>
+                </div>
+            </div>
+
+            
+            <!-- Education Section (Post-Submit) -->
+            <div class="education-section" id="educationSection">
+                <div class="success-box">
+                    <div class="success-icon">🎉</div>
+                    <h2 style="font-size: 36px; margin-bottom: 20px;">Congratulations!</h2>
+                    <p style="font-size: 20px; margin-bottom: 30px; opacity: 0.95;">Based on the information you provided, your business <strong>qualifies for a 90-day free trial</strong>.</p>
+                    
+                    <div class="savings-display">
+                        <p style="font-size: 18px; margin-bottom: 12px; opacity: 0.9; color: #cbd5e1;">💰 Estimated Annual Savings:</p>
+                        <div class="savings-amount" id="savingsAmount">$0</div>
+                        <p style="font-size: 16px; opacity: 0.85; margin-top: 12px; color: #94a3b8;">Based on 10-30% water reduction from your monthly bill of <span id="displayBill">$0</span></p>
+                    </div>
+                </div>
+                
+                <div class="info-box">
+                    <h3>🚀 What happens next?</h3>
+                    <p style="color: #cbd5e1; line-height: 1.8; margin-bottom: 18px;">
+                        <strong>Tyler True</strong> from AquaFlow Technologies will contact you within 24 hours to:
+                    </p>
+                    <ul>
+                        <li>Answer any questions about the technology</li>
+                        <li>Review your specific water usage profile</li>
+                        <li>Schedule a site survey</li>
+                        <li>Provide detailed NSF test results and case studies</li>
+                    </ul>
+                </div>
+                
+                <!-- Video Section -->
+                <div style="margin-bottom: 40px;">
+                    <h2 style="color: #06b6d4; font-size: 28px; margin-bottom: 20px; text-align: center;">▶️ See AquaFlow in Action</h2>
+                    <div class="video-container">
+                        <iframe 
+                            width="560" 
+                            height="315" 
+                            src="https://www.youtube.com/embed/meWHWxKI2g8" 
+                            title="YouTube video player" 
+                            frameborder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                            referrerpolicy="strict-origin-when-cross-origin" 
+                            allowfullscreen>
+                        </iframe>
+                    </div>
+                </div>
+                
+                <!-- NSF Testing Results -->
+                <div class="stat-card">
+                    <h3>🔬 NSF International Testing (2018)</h3>
+                    <ul style="color: #cbd5e1; line-height: 2; margin-left: 20px;">
+                        <li><strong>Air-only test:</strong> AquaFlow reduced air flow measured by water meters by an average of 27% across pressure levels</li>
+                        <li><strong>Water main break simulation (air + water):</strong>
+                            <ul style="margin-top: 12px;">
+                                <li>Without AquaFlow: Meter error averaged <strong style="color: #ef4444;">35%</strong></li>
+                                <li>With AquaFlow: Meter error reduced to <strong style="color: #10b981;">2%</strong></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Case Studies -->
+                <div style="margin-top: 50px;">
+                    <h2 style="color: #06b6d4; font-size: 30px; margin-bottom: 30px; text-align: center;">📊 Proven Results Across Industries</h2>
+                    
+                    <div class="case-study">
+                        <div class="case-study-icon">🚗</div>
+                        <h3>Washmasters Car Wash - Sherman, TX</h3>
+                        <p><strong>Industry:</strong> Commercial Car Wash</p>
+                        <p><strong>Results:</strong> Water usage dropped from 42-47 gal/car to 21-24 gal/car after installation</p>
+                        <div class="case-study-result">💧 50% Water Reduction | Monthly savings ~$5,000</div>
+                    </div>
+                    
+                    <div class="case-study">
+                        <div class="case-study-icon">🏭</div>
+                        <h3>7C's Linen Services - Pompano Beach, FL</h3>
+                        <p><strong>Industry:</strong> Commercial Laundry</p>
+                        <p><strong>Results:</strong> 25% reduction in water consumption based on meter readings</p>
+                        <div class="case-study-result">💧 25% Water Reduction | Lower costs without process changes</div>
+                    </div>
+                    
+                    <div class="case-study">
+                        <div class="case-study-icon">🏨</div>
+                        <h3>DoubleTree Santa Fe</h3>
+                        <p><strong>Industry:</strong> Hospitality</p>
+                        <p><strong>Results:</strong> Water efficiency per room improved by 33.81%</p>
+                        <div class="case-study-result">💧 34% Efficiency Improvement | 25% cost reduction</div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 40px; padding: 30px; background: rgba(6, 182, 212, 0.1); border-radius: 16px; border: 1px solid rgba(6, 182, 212, 0.3);">
+                        <p style="color: #cbd5e1; font-size: 18px; margin-bottom: 20px; font-weight: 600;">
+                            🔗 Learn More About AquaFlow Technology
+                        </p>
+                        <a href="https://aquaflow.com/how-it-works/#/?ref=tylertrue" target="_blank" class="cta-link">
+                            Visit AquaFlow.com →
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Create realistic rain effect
+        function createRain() {
+            const rain = document.getElementById('rain');
+            const numberOfDrops = 100;
+            for (let i = 0; i < numberOfDrops; i++) {
+                const drop = document.createElement('div');
+                drop.className = 'drop';
+                drop.style.left = Math.random() * 100 + '%';
+                drop.style.animationDuration = (Math.random() * 0.5 + 0.5) + 's';
+                drop.style.animationDelay = Math.random() * 2 + 's';
+                drop.style.opacity = Math.random() * 0.5 + 0.3;
+                rain.appendChild(drop);
+            }
+        }
+        createRain();
+
+        // === Config ===
+        const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbxWeDYZtqJKdaHH17XQR4oyB5poAkfWgj6E7sdWlDrJ2BzmFY2K6YkupD0FrthDlBOz/exec';
+        const MIN_HUMAN_MS = 3000;
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const TEST_MODE = urlParams.get('test') === '1'; // add ?test=1 to avoid sending leads
+
+        // === Analytics (free-friendly) ===
+        function trackEvent(name, props = {}) {
+            try {
+                // GA4
+                if (typeof window.gtag === 'function') {
+                    window.gtag('event', name, props);
+                }
+                // Microsoft Clarity (optional)
+                if (typeof window.clarity === 'function') {
+                    window.clarity('event', name);
+                }
+            } catch (e) { /* noop */ }
+
+            // Always log in dev/test
+            if (TEST_MODE) console.log('[event]', name, props);
+        }
+
+        // === Attribution ===
+        const ATTR_KEY = 'af_attribution_v1';
+        function readAttribution() {
+            try {
+                const raw = localStorage.getItem(ATTR_KEY);
+                return raw ? JSON.parse(raw) : null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function writeAttribution(obj) {
+            try { localStorage.setItem(ATTR_KEY, JSON.stringify(obj)); } catch (e) {}
+        }
+
+        function captureAttribution() {
+            const now = Date.now();
+
+            // If we already have attribution saved, only overwrite when new UTM params exist
+            const existing = readAttribution() || {};
+            const incoming = {
+                landing_url: window.location.href,
+                referrer: document.referrer || '',
+                utm_source: urlParams.get('utm_source') || '',
+                utm_medium: urlParams.get('utm_medium') || '',
+                utm_campaign: urlParams.get('utm_campaign') || '',
+                utm_content: urlParams.get('utm_content') || '',
+                utm_term: urlParams.get('utm_term') || '',
+                captured_at: new Date().toISOString()
+            };
+
+            const hasNewUtm = !!(incoming.utm_source || incoming.utm_medium || incoming.utm_campaign || incoming.utm_content || incoming.utm_term);
+            const merged = hasNewUtm ? incoming : { ...incoming, ...existing };
+
+            // TTL 30 days
+            merged.expires_at_ms = now + (30 * 24 * 60 * 60 * 1000);
+
+            writeAttribution(merged);
+            return merged;
+        }
+
+        function getAttributionSafe() {
+            const a = readAttribution();
+            if (!a) return captureAttribution();
+            if (typeof a.expires_at_ms === 'number' && Date.now() > a.expires_at_ms) return captureAttribution();
+            return a;
+        }
+
+        // === Utils ===
+        const formatCurrency = (amount) => new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(amount);
+
+        function isValidEmail(email) {
+            // practical regex, not perfect, good enough for leads
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function getEmailDomain(email) {
+            const at = email.lastIndexOf('@');
+            return at > -1 ? email.slice(at + 1).toLowerCase() : '';
+        }
+
+        // === State ===
+        const flowStartMs = Date.now();
+        captureAttribution();
+
+        let formData = {
+            firstName: '',
+            lastName: '',
+            email: '',
+            phone: '',
+            company: '',
+            jobTitle: '',
+            propertyType: '',
+            waterBill: '',
+            waterBillAverage: 0,
+            referralSource: '',
+            timestamp: '',
+
+            // computed
+            estimatedMonthlySavingsMin: 0,
+            estimatedMonthlySavingsMax: 0,
+            estimatedAnnualSavingsMin: 0,
+            estimatedAnnualSavingsMax: 0,
+            estimatedAnnualSavingsAvg: 0,
+
+            // ops
+            leadScore: 0,
+            segment: '',
+            nextAction: ''
+        };
+
+        const PROOF_BLOCKS = {
+            'hotel': `
+                <div style="margin-bottom: 10px;"><strong>The Gates Hotel South Beach:</strong> calculated an <strong>average 20.7% savings</strong> off the entire water utility bill and <strong>8.99% less water used</strong> on average. Install reported <strong>under 30 minutes</strong>, with guests satisfied with pressure.</div>
+                <div><strong>DoubleTree Santa Fe:</strong> water per occupied room dropped from <strong>139.36 → 104.14 gallons</strong> (26 days before vs 26 days after), with reported efficiency improvement of <strong>33.81%</strong>.</div>
+            `,
+            'multifamily': `
+                <div style="margin-bottom: 10px;"><strong>Foxcroft Village Apartments:</strong> reported a <strong>24.7% year-over-year reduction</strong> in water + sewer expenses (property manager letter).</div>
+                <div><strong>Acadian Gardens (93 units):</strong> reported a <strong>25.3% decrease</strong> in monthly water consumption/cost, and a claimed <strong>$150,000</strong> property value increase tied to NOI.</div>
+            `,
+            'data-center': `
+                <div style="margin-bottom: 10px;"><strong>Designed for always-on operations:</strong> baseline → verify → report, with pressure/operations checks up front.</div>
+                <div style="margin-bottom: 10px;"><strong>Adjacent proof (healthcare):</strong> a hospital evaluation quantified <strong>12%</strong> savings and referenced ~<strong>$14,000</strong> accumulated savings in the report period (context-dependent).</div>
+                <div><strong>Operational credibility:</strong> multiple hospitality installs report <strong>under 30 minutes</strong> installation and maintained pressure/guest experience.</div>
+            `,
+            'hospital': `
+                <div><strong>Healthcare environments:</strong> we measure baseline → implement → verify, with pressure checks and transparent reporting.</div>
+            `,
+            'other': `
+                <div><strong>We verify results:</strong> baseline → implement → compare → report.</div>
+            `
+        };
+
+        function computeEstimates() {
+            const monthly = Number(formData.waterBillAverage || 0);
+            const minMonthly = monthly * 0.10;
+            const maxMonthly = monthly * 0.30;
+
+            formData.estimatedMonthlySavingsMin = minMonthly;
+            formData.estimatedMonthlySavingsMax = maxMonthly;
+
+            formData.estimatedAnnualSavingsMin = minMonthly * 12;
+            formData.estimatedAnnualSavingsMax = maxMonthly * 12;
+            formData.estimatedAnnualSavingsAvg = (formData.estimatedAnnualSavingsMin + formData.estimatedAnnualSavingsMax) / 2;
+        }
+
+        function deriveSegment() {
+            const pt = formData.propertyType;
+            if (pt === 'data-center') return 'enterprise';
+            if (pt === 'hotel') return 'commercial';
+            if (pt === 'multifamily') return 'real-estate';
+            if (pt === 'hospital') return 'healthcare';
+            return 'unknown';
+        }
+
+        function scoreLead() {
+            let score = 0;
+
+            // vertical fit
+            if (['data-center', 'hotel', 'multifamily'].includes(formData.propertyType)) score += 20;
+
+            // water spend signal
+            const m = Number(formData.waterBillAverage || 0);
+            if (m >= 15000) score += 30;
+            else if (m >= 5000) score += 20;
+            else if (m >= 1500) score += 10;
+
+            // corporate email signal
+            const d = getEmailDomain(formData.email);
+            if (d && !['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'icloud.com'].includes(d)) score += 10;
+
+            // role signal
+            if (formData.jobTitle) score += 5;
+
+            formData.leadScore = Math.min(100, score);
+        }
+
+        function nextActionFromScore() {
+            if (formData.leadScore >= 80) return 'call_within_24h';
+            if (formData.leadScore >= 50) return 'send_trial_and_schedule';
+            return 'nurture';
+        }
+
+        function renderEstimateAndProof() {
+            computeEstimates();
+
+            document.getElementById('headlineBill').textContent = formatCurrency(formData.waterBillAverage);
+            document.getElementById('headlineSavingsAmount').textContent =
+                `${formatCurrency(formData.estimatedAnnualSavingsMin)} - ${formatCurrency(formData.estimatedAnnualSavingsMax)}`;
+            document.getElementById('headlineMonthlySavings').textContent =
+                `${formatCurrency(formData.estimatedMonthlySavingsMin)} - ${formatCurrency(formData.estimatedMonthlySavingsMax)}`;
+
+            const pt = formData.propertyType || 'other';
+            document.getElementById('proofCardBody').innerHTML = PROOF_BLOCKS[pt] || PROOF_BLOCKS.other;
+
+            // Email preview
+            document.getElementById('emailPreview').textContent = generateEmailText();
+            trackEvent('estimate_shown', {
+                property_type: pt,
+                bill_monthly: formData.waterBillAverage,
+                annual_min: Math.round(formData.estimatedAnnualSavingsMin),
+                annual_max: Math.round(formData.estimatedAnnualSavingsMax)
+            });
+        }
+
+        function generateEmailText() {
+            const proofTextByType = {
+                'hotel': 'Hotels: The Gates Hotel South Beach calculated 20.7% average savings off the entire water utility bill and 8.99% less water used on average. DoubleTree Santa Fe reported water per occupied room dropping 139.36 → 104.14 gallons (26 days before vs after).',
+                'multifamily': 'Multifamily: Foxcroft Village Apartments reported a 24.7% year-over-year reduction in water + sewer expenses. Acadian Gardens (93 units) reported a 25.3% monthly decrease and a claimed $150,000 property value increase tied to NOI.',
+                'data-center': 'Data centers: We don’t have a published data-center-specific case study in this packet yet, but our approach is built for always-on environments: baseline → verify → report, with pressure/operations checks up front. Adjacent proof includes a hospital evaluation that quantified 12% savings in its report period.',
+                'hospital': 'Healthcare: We measure baseline → implement → verify, with pressure checks and transparent reporting.',
+                'other': 'We verify results with baseline → implement → compare → report.'
+            };
+
+            const pt = formData.propertyType || 'other';
+            const proofLine = proofTextByType[pt] || proofTextByType.other;
+
+            return `Hi ${formData.firstName || 'there'},\n\nHere’s your AquaFlow estimate based on what you entered:\n\nEstimated savings range: 10–30%\nEstimated annual savings: ${formatCurrency(formData.estimatedAnnualSavingsMin)} – ${formatCurrency(formData.estimatedAnnualSavingsMax)}\nEstimated monthly savings: ${formatCurrency(formData.estimatedMonthlySavingsMin)} – ${formatCurrency(formData.estimatedMonthlySavingsMax)}\nInputs used: Property type = ${pt}, Monthly water bill ≈ ${formatCurrency(formData.waterBillAverage)}\n\nAssumptions behind this estimate:\n- This is a modeled range based on typical patterns and your inputs.\n- Verified results depend on site-specific factors (pressure, fixture/load mix, operating schedule).\n- Our verification method is simple: baseline → install → compare → report.\n\nProof in similar environments:\n${proofLine}\n\nNext steps (no obligation):\nReply with any of the below and we’ll tighten accuracy:\n1) Number of meters / main line setup\n2) Monthly water + sewer total (or a range)\n3) Any pressure constraints or critical equipment notes\n\n— AquaFlow\n`;
+        }
+
+        // === Intro flow ===
+        function handleAnswer(answeredYes) {
+            document.getElementById('questionSection').style.display = 'none';
+            document.getElementById('revealSection').style.display = 'block';
+            trackEvent('hook_answer', { answered_yes: !!answeredYes });
+        }
+
+        function showForm() {
+            document.getElementById('revealSection').style.display = 'none';
+            document.getElementById('formSection').style.display = 'block';
+            document.getElementById('progressContainer').style.display = 'block';
+            updateProgress(1);
+            trackEvent('start_flow');
+        }
+
+        function updateProgress(step) {
+            const totalSteps = 5;
+            const percentage = Math.round((step / totalSteps) * 100);
+
+            document.getElementById('progressBar').style.width = percentage + '%';
+            document.getElementById('progressText').textContent = `Step ${step} of ${totalSteps}`;
+            document.getElementById('progressPercent').textContent = percentage + '%';
+        }
+
+        function nextStep(stepNumber) {
+            // Validate current step before advancing
+            if (stepNumber === 2) {
+                formData.firstName = document.getElementById('firstName').value.trim();
+                formData.lastName = document.getElementById('lastName').value.trim();
+                if (!formData.firstName || !formData.lastName) {
+                    alert('Please enter both first and last name');
+                    return;
+                }
+            } else if (stepNumber === 3) {
+                formData.company = document.getElementById('company').value.trim();
+                formData.jobTitle = document.getElementById('jobTitle').value.trim();
+                if (!formData.company || !formData.jobTitle) {
+                    alert('Please enter company name and job title');
+                    return;
+                }
+            }
+
+            // Hide all steps
+            for (let i = 1; i <= 5; i++) {
+                const step = document.getElementById('step' + i);
+                if (step) step.style.display = 'none';
+            }
+
+            // Show next step
+            const nextStepEl = document.getElementById('step' + stepNumber);
+            if (nextStepEl) {
+                nextStepEl.style.display = 'block';
+                updateProgress(stepNumber);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                trackEvent('step_view', { step: stepNumber });
+            }
+
+            // Render estimate on step 5
+            if (stepNumber === 5) {
+                renderEstimateAndProof();
+            }
+        }
+
+        function prevStep(stepNumber) {
+            for (let i = 1; i <= 5; i++) {
+                const step = document.getElementById('step' + i);
+                if (step) step.style.display = 'none';
+            }
+
+            const prevStepEl = document.getElementById('step' + stepNumber);
+            if (prevStepEl) {
+                prevStepEl.style.display = 'block';
+                updateProgress(stepNumber);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                trackEvent('step_back', { to_step: stepNumber });
+            }
+        }
+
+        function selectPropertyType(type) {
+            formData.propertyType = type;
+            trackEvent('property_type_select', { property_type: type });
+            nextStep(4);
+        }
+
+        function selectWaterBill(range, avgAmount) {
+            formData.waterBill = range;
+            formData.waterBillAverage = avgAmount;
+            trackEvent('water_bill_select', { range, avgAmount });
+            nextStep(5);
+        }
+
+        function selectReferralAndSubmit(source) {
+            formData.referralSource = source;
+
+            // Honeypot spam trap
+            const honeypot = (document.getElementById('website')?.value || '').trim();
+            if (honeypot) {
+                console.warn('Spam detected (honeypot). Dropping submission.');
+                trackEvent('lead_submit_fail', { error_type: 'honeypot' });
+                return;
+            }
+
+            // Timing check
+            const elapsed = Date.now() - flowStartMs;
+            if (elapsed < MIN_HUMAN_MS) {
+                console.warn('Likely bot (too fast). Dropping submission.');
+                trackEvent('lead_submit_fail', { error_type: 'too_fast', elapsed_ms: elapsed });
+                return;
+            }
+
+            // Email required
+            formData.email = document.getElementById('email').value.trim();
+            if (!isValidEmail(formData.email)) {
+                alert('Please enter a valid email address');
+                return;
+            }
+
+            formData.phone = document.getElementById('phone').value.trim();
+
+            submitQualification();
+        }
+
+        function submitQualification() {
+            formData.timestamp = new Date().toISOString();
+            computeEstimates();
+
+            // Enrich
+            const attribution = getAttributionSafe();
+            formData.segment = deriveSegment();
+            scoreLead();
+            formData.nextAction = nextActionFromScore();
+
+            const payload = {
+                ...formData,
+                ...attribution,
+                // include email body so your Apps Script can email it (optional)
+                detailedEstimateEmailText: generateEmailText()
+            };
+
+            trackEvent('lead_submit_attempt', {
+                property_type: formData.propertyType,
+                lead_score: formData.leadScore,
+                segment: formData.segment
+            });
+
+            console.log('Lead Captured:', payload);
+
+            // Send to Google Sheets (unless in test mode)
+            if (!TEST_MODE) {
+                const formDataToSend = new FormData();
+                formDataToSend.append('data', JSON.stringify(payload));
+
+                fetch(GOOGLE_SHEET_URL, { method: 'POST', body: formDataToSend })
+                    .then(r => r.text())
+                    .then(result => {
+                        console.log('Data sent to Google Sheets successfully:', result);
+                        trackEvent('lead_submit_success');
+                    })
+                    .catch(error => {
+                        console.error('Error sending to Google Sheets:', error);
+                        trackEvent('lead_submit_fail', { error_type: 'network' });
+                    });
+            } else {
+                console.log('TEST_MODE enabled: skipping network send (add/remove ?test=1).');
+                trackEvent('lead_submit_success', { test_mode: true });
+            }
+
+            // Update education section display (post-submit)
+            document.getElementById('savingsAmount').textContent =
+                `${formatCurrency(formData.estimatedAnnualSavingsMin)} - ${formatCurrency(formData.estimatedAnnualSavingsMax)}`;
+            document.getElementById('displayBill').textContent = formatCurrency(formData.waterBillAverage);
+
+            // Show results / education
+            document.getElementById('formSection').style.display = 'none';
+            document.getElementById('progressContainer').style.display = 'none';
+            document.getElementById('educationSection').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Enter key handling
+        document.addEventListener('DOMContentLoaded', function () {
+            trackEvent('view_landing');
+            const inputs = document.querySelectorAll('.text-input');
+            inputs.forEach(input => {
+                input.addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter') {
+                        const stepDiv = input.closest('.question-step');
+                        const button = stepDiv?.querySelector('.submit-btn');
+                        if (button) button.click();
+                    }
+                });
+            });
+        });
+</script>
+</body>
+</html>
